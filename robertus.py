@@ -1,31 +1,28 @@
 import pgzrun
 import pygame
+from actor_group import ActorGroup
+from animated_actor import AnimatedActor
 
 WIDTH = 1024*2
 HEIGHT = 640*2
-robertus_frames = ["200200_face_editor" , "200x200_face_closed_eyes_editor"]
-robertus= Actor(robertus_frames[0]) 
 
 
-frame_index = 0
-frame_duration = 0.5  # Time in seconds for each frame
-time_elapsed = 0
+
+# Create an instance of ActorGroup
+robertus = ActorGroup()
+
+# Add some animated actors to the group
+robertus.add(AnimatedActor(["200200_face_editor" , "200x200_face_closed_eyes_editor"], (100, 100)))
+robertus.add(AnimatedActor(["200200_face_editor" , "200x200_face_closed_eyes_editor"], (200, 200)))
+
 
 background = pygame.image.load("images/1024x640_editor_background.png")
 scaled_background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+follow=False
 
 def update(dt):
-    global frame_index, time_elapsed
-
-  # Update time elapsed
-    time_elapsed += dt
-
-    # Switch frame when the duration is exceeded
-    if time_elapsed >= frame_duration:
-        frame_index = (frame_index + 1) % len(robertus_frames)
-        robertus.image = robertus_frames[frame_index]
-        time_elapsed = 0  # Reset the timer
-
+    robertus.update(dt)
+    
 def draw():
     screen.clear()
     # Blit the scaled background
@@ -33,8 +30,24 @@ def draw():
     robertus.draw()
 
 def on_mouse_move(pos):
-    # Überprüfen, ob die linke Maustaste gedrückt wird
-    if mouse.LEFT:
-        robertus.pos = pos  # Setzt die Position des Actors auf die Mausposition
+    global follow
+    global robertus
+
+
+    # Übedrprüfen, ob die linke Maustaste gedrückt wird
+    if follow == True:
+        robertus.set_position(pos)   # Setzt die Position des Actors auf die Mausposition
+        
+
+def on_mouse_down(pos, button):
+    global robertus
+    global follow
+
+    if button == mouse.LEFT and robertus.collidepoint(pos):
+        follow = True
+    
+    if button == mouse.RIGHT:
+        follow = False
+    
 
 pgzrun.go()
